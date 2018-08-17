@@ -1,32 +1,19 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
+    new Task: <input type="text" v-model="newTask" @keyup.enter="addTask">
     <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
+      <li v-for="task in tasks">
+        <span v-if="task.editMode" 
+          @keyup.enter="saveTask(task)"
+          @keyup.esc="cancelEdit(task)"><input type="text" v-model="task.name"> </span>
+        <div v-else>
+          <input type="checkbox" v-model="task.done">
+          <span @click="editTask(task)">{{ task.name }} </span>
+          <span @click="deleteTask(task)">[x]</span>
+        </div>
+      </li>
     </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <button @click="deleteAll">Delete done</button>
   </div>
 </template>
 
@@ -35,6 +22,53 @@ export default {
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+  data () {
+    return {
+      tasks: [
+        { name: 'todo 1', done: false, editMode: false },
+        { name: 'todo 2', done: false, editMode: false },
+        { name: 'todo 3', done: true, editMode: false },
+      ],
+      newTask: "",
+    }
+  },
+  methods: {
+    addTask: function(event) {
+      //let text = this.newTask && this.newTask.trim()
+      let text = this.newTask.trim()
+      if (!text) {
+        return
+      }
+      this.tasks.push({
+        name: this.newTask,
+        done: false,
+        editMode: false
+      })
+      this.newTask = ""
+    },
+    deleteTask: function(task) {
+      this.tasks.splice(this.tasks.indexOf(task), 1)
+    },
+    deleteAll: function(event) {
+      for (let i=this.tasks.length - 1; i>=0; i--) {
+        if (this.tasks[i].done) {
+          this.tasks.splice(i, 1)
+        }
+      }
+    },
+    editTask: function(task) {
+      task.editMode = true
+      task.cache = task.name
+    },
+    saveTask: function(task) {
+      task.editMode = false
+    },
+    cancelEdit: function(task) {
+      task.name = task.cache
+      task.editMode = false
+      console.log(task.cache)
+    },
   }
 }
 </script>
@@ -49,7 +83,6 @@ ul {
   padding: 0;
 }
 li {
-  display: inline-block;
   margin: 0 10px;
 }
 a {
